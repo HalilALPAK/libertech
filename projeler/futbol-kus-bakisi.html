@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halısaha İstatistik Analiz Sistemi | Libertech</title>
+<meta name="description" content="Halı sahada 4-6 kamera ile oyuncuların koşu, pas, asist ve gol istatistiklerini çıkaran yapay zeka destekli analiz sistemi.">
+<link rel="icon" href="../assets/logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a href="../index.html#anasayfa" class="logo-link">
+      <img src="../assets/logo.png" alt="Libertech Logo" class="logo-img">
+    </a>
+
+    <nav class="nav-desktop">
+      <ul class="nav-list">
+        <li><a href="../index.html#anasayfa" class="nav-link">Anasayfa</a></li>
+        <li><a href="../index.html#hizmetlerimiz" class="nav-link">Hizmetlerimiz</a></li>
+        <li><a href="../index.html#projelerimiz" class="nav-link">Projelerimiz</a></li>
+        <li><a href="../index.html#iletisim" class="nav-link">İletişim</a></li>
+      </ul>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="Menüyü Aç/Kapat">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <nav class="nav-mobile" id="nav-mobile">
+    <ul class="nav-list-mobile">
+      <li><a href="../index.html#anasayfa" class="nav-link-mobile">Anasayfa</a></li>
+      <li><a href="../index.html#hizmetlerimiz" class="nav-link-mobile">Hizmetlerimiz</a></li>
+      <li><a href="../index.html#projelerimiz" class="nav-link-mobile">Projelerimiz</a></li>
+      <li><a href="../index.html#iletisim" class="nav-link-mobile">İletişim</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="detail-hero">
+    <div class="container">
+      <a href="../index.html#projelerimiz" class="back-link">← Projelerimize Dön</a>
+      <p class="eyebrow">Proje</p>
+      <h1>Halısaha İstatistik Analiz Sistemi</h1>
+      <p class="detail-tagline">
+        Halı saha maçlarında 4-6 sabit kamera ile oyuncuları tespit edip takip eden, koşu mesafesinden
+        pas ve gol istatistiklerine kadar maç sonu performans raporu üreten yapay zeka destekli analiz sistemi.
+      </p>
+    </div>
+  </section>
+
+  <!-- DETAY -->
+  <section class="detail-section">
+    <div class="container">
+      <h2>Proje Hakkında</h2>
+      <div class="detail-body">
+        <div class="detail-text">
+          <p>
+            Amatör ve halı saha futbolunda profesyonel maçlarda kullanılan performans analiz araçları
+            genellikle erişilemez veya çok maliyetlidir. Bu proje, sahaya yerleştirilen 4 ile 6 arasında
+            sabit kamera görüntüsünü işleyerek benzer bir analiz deneyimini halı saha ölçeğine taşımayı
+            hedefler.
+          </p>
+          <p>
+            Sistem, oyuncuları tespit etmek için <strong>YOLOv8m</strong> modelini, tespit edilen oyuncuların
+            kimliğini maç boyunca korumak için <strong>BoT-SORT</strong> çoklu nesne takip algoritmasını kullanır.
+            Daha hassas analizler için <strong>MobileSAM</strong> ile piksel seviyesinde oyuncu segmentasyonu
+            yapılır. Kameralardan gelen görüntüler, perspektif (homografi) dönüşümü ile sahanın kuş bakışı
+            (top-down) bir temsiline aktarılır.
+          </p>
+          <p>
+            Bu kuş bakışı görünüm sayesinde oyuncuların saha üzerindeki gerçek konumları metre cinsinden
+            hesaplanabilir hale gelir. Buradan yola çıkılarak koşu mesafesi, sprint sayısı, pas, asist ve
+            gol gibi istatistikler otomatik olarak çıkarılır ve maç sonunda oyuncu bazlı bir performans
+            raporu olarak sunulur.
+          </p>
+        </div>
+
+        <div class="demo-showcase">
+          <video class="video-embed" controls preload="metadata" poster="../assets/projects/futbol-poster.jpg">
+            <source src="../assets/videos/futbol.mp4" type="video/mp4">
+          </video>
+          <p class="demo-caption">Sahadaki kameradan alınan görüntüde oyuncu takibi ve kuş bakışı mini harita.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÖZELLİKLER -->
+  <section class="detail-section">
+    <div class="container">
+      <h2>Öne Çıkan Özellikler</h2>
+      <ul class="feature-list">
+        <li><span class="check">✓</span> 4-6 kameradan eş zamanlı görüntü işleme</li>
+        <li><span class="check">✓</span> YOLOv8 ile gerçek zamanlı oyuncu tespiti</li>
+        <li><span class="check">✓</span> BoT-SORT ile kesintisiz oyuncu takibi (tracking)</li>
+        <li><span class="check">✓</span> MobileSAM ile piksel seviyesinde segmentasyon</li>
+        <li><span class="check">✓</span> Perspektif dönüşümüyle kuş bakışı saha görünümü</li>
+        <li><span class="check">✓</span> Koşu, pas, asist ve gol istatistikleriyle maç sonu raporu</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- MEDYA (yakında) -->
+  <section class="detail-section">
+    <div class="container">
+      <h2>Görseller</h2>
+      <div class="media-placeholder-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 620px;">
+        <div class="media-placeholder">
+          <span class="icon">📊</span>
+          <span class="label">Yakında</span>
+        </div>
+        <div class="media-placeholder">
+          <span class="icon">🖼️</span>
+          <span class="label">Yakında</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <img src="../assets/logo.png" alt="Libertech Logo" class="footer-logo">
+    <p>&copy; <span id="year"></span> Libertech Yazılım Çözümleri. Tüm hakları saklıdır.</p>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
