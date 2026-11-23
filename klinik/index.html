@@ -89,6 +89,7 @@ aside.off .cat button{opacity:.4;pointer-events:none}
   <button class="btn" id="b-undo" disabled>Geri al</button>
   <button class="btn" id="b-cut">Duvarlar: alçak</button>
   <button class="btn" id="b-reset">Planı sıfırla</button>
+  <button class="btn" id="b-export" hidden>Planı indir</button>
  </div>
 </header>
 <div class="app">
@@ -139,22 +140,11 @@ const CL_ROOMS=[
  {n:'Kullanılmayan alan',x0:3.01,z0:14.18,x1:6.22,z1:18.26,f:'vinil'},
  {n:'Lavabo',a:1.95,x0:6.22,z0:16.47,x1:7.43,z1:18.26,f:'seramik'},
  {n:'WC',a:1.95,x0:7.43,z0:16.47,x1:8.66,z1:18.26,f:'seramik'}];
-const CL_WALLS=[
- {a:[.78,0],b:[9.85,0],t:.25,o:[{s:.15,e:1.95,b:.35,t:2.5},{s:2.07,e:4.08,b:0,t:2.4,entry:'glass'},{s:4.2,e:8.9,b:.35,t:2.5}]},
- {a:[9.85,0],b:[9.85,8.97],t:.25,o:[]},{a:[9.85,8.97],b:[8.66,8.97],t:.25,o:[]},{a:[8.66,8.97],b:[8.66,18.26],t:.25,o:[]},
- {a:[3.01,18.26],b:[8.66,18.26],t:.25,o:[]},{a:[3.01,5.65],b:[3.01,18.26],t:.25,o:[]},{a:[0,5.65],b:[3.01,5.65],t:.25,o:[]},{a:[.78,0],b:[0,5.65],t:.25,o:[]},
- {a:[3.01,5.65],b:[7.07,5.65],t:.12,o:[]},{a:[5.91,3.75],b:[5.91,5.65],t:.12,o:[]},
- {a:[7.07,5.65],b:[7.07,14.18],t:.12,o:[{s:.38,e:1.36,b:0,t:2.1},{s:5,e:5.93,b:0,t:2.1}]},
- {a:[3.01,10.29],b:[7.07,10.29],t:.12,o:[]},{a:[3.01,14.18],b:[7.07,14.18],t:.12,o:[]},{a:[6.22,14.18],b:[6.22,18.26],t:.12,o:[]},
- {a:[8.28,4.62],b:[8.28,8.97],t:.12,o:[{s:1.41,e:2.39,b:0,t:2.1}]},{a:[8.28,4.62],b:[9.85,4.62],t:.12,o:[]},
- {a:[6.22,16.47],b:[8.66,16.47],t:.12,o:[{s:.27,e:1.07,b:0,t:2.1}]},{a:[7.43,16.47],b:[7.43,18.26],t:.12,o:[{s:.45,e:1.25,b:0,t:2.1}]}];
+const CL_WALLS=[{"a":[0.78,0],"b":[9.85,0],"t":0.25,"o":[{"s":0.15,"e":1.95,"b":0.35,"t":2.5},{"s":2.07,"e":4.08,"b":0,"t":2.4,"entry":"glass"},{"s":4.2,"e":8.9,"b":0.35,"t":2.5}]},{"a":[9.85,0],"b":[9.85,8.97],"t":0.25,"o":[]},{"a":[9.85,8.97],"b":[8.66,8.97],"t":0.25,"o":[]},{"a":[8.66,8.97],"b":[8.66,18.26],"t":0.25,"o":[]},{"a":[3.01,18.26],"b":[8.66,18.26],"t":0.25,"o":[]},{"a":[3.01,5.65],"b":[3.01,18.26],"t":0.25,"o":[]},{"a":[0,5.65],"b":[3.01,5.65],"t":0.25,"o":[]},{"a":[0.78,0],"b":[0,5.65],"t":0.25,"o":[]},{"a":[3.01,5.65],"b":[7.07,5.65],"t":0.12,"o":[]},{"a":[5.91,3.75],"b":[5.91,5.65],"t":0.12,"o":[]},{"a":[7.07,5.65],"b":[7.07,14.18],"t":0.12,"o":[{"s":0.38,"e":1.36,"b":0,"t":2.1},{"s":5,"e":5.93,"b":0,"t":2.1}]},{"a":[3.01,10.29],"b":[7.07,10.29],"t":0.12,"o":[]},{"a":[3.01,14.18],"b":[7.07,14.18],"t":0.12,"o":[]},{"a":[6.22,14.18],"b":[6.22,18.26],"t":0.12,"o":[]},{"a":[8.28,4.62],"b":[8.28,8.97],"t":0.12,"o":[]},{"a":[8.28,4.62],"b":[9.85,4.62],"t":0.12,"o":[{"s":0.3,"e":1.28,"b":0,"t":2.1}]},{"a":[6.22,16.47],"b":[8.66,16.47],"t":0.12,"o":[{"s":0.27,"e":1.07,"b":0,"t":2.1}]},{"a":[7.43,16.47],"b":[7.43,18.26],"t":0.12,"o":[{"s":0.45,"e":1.25,"b":0,"t":2.1}]}];
 const CL_DEFAULT=[
- ['armchair',1.49,.68,0],['armchair',2.32,.68,0],['armchair',6.16,.68,0],['armchair',7.03,.68,0],
- ['sofa',1.08,2.63,90],['sofa2',2.14,4.62,180],['sofa',4.48,4.62,180],['plant',9.45,.5,0],['reception',8.66,3.35,-90],
- ['dentalunit',5.18,8.1,-55],['ccounter',3.44,8.9,90],['dentalunit',5.24,12.3,-55],['ccounter',3.44,12.8,90],
- ['xpano',9.07,8.1,0],['desk',9.04,5.02,0],['sink',6.82,17.9,180],['toilet',8.05,17.8,180],['plant',8.25,16.1,0]];
+ ['armchair',1.49,.68,0],['armchair',2.32,.68,0],['sofa',1.08,2.63,90],['sofa2',2.14,4.62,180],['sofa',4.48,4.62,180],['plant',9.45,.5,0],['reception',8.55,1.35,-90],['dentalunit',5.18,8.1,-55],['ccounter',3.44,8.9,90],['dentalunit',5.24,12.3,-55],['ccounter',3.44,12.8,90],['xpano',9.07,8.1,0],['desk',8.6,5.6,90],['sink',6.82,17.9,180,'#a47a52'],['toilet',8.05,17.8,180,'#f4f3f0'],['plant',8.25,16.1,0],['plant',.7,4.95,0]];
 const UNITS={
- klinik:{name:'Diş Kliniği · zemin kat',W:9.85,D:18.26,rooms:CL_ROOMS,walls:CL_WALLS,def:CL_DEFAULT,key:'klinik3d-v2',start:{x:3.1,z:1.2,yaw:Math.PI},first:'Diş kliniği',outline:[[.78,0],[9.85,0],[9.85,8.97],[8.66,8.97],[8.66,18.26],[3.01,18.26],[3.01,5.65],[0,5.65]],
+ klinik:{name:'Diş Kliniği · zemin kat',W:9.85,D:18.26,rooms:CL_ROOMS,walls:CL_WALLS,def:CL_DEFAULT,key:'klinik3d-v3',start:{x:3.1,z:1.2,yaw:Math.PI},first:'Diş kliniği',outline:[[.78,0],[9.85,0],[9.85,8.97],[8.66,8.97],[8.66,18.26],[3.01,18.26],[3.01,5.65],[0,5.65]],
   dims:[['9,28 m',4.9,-.6,0],['16,30 m',10.5,8.15,Math.PI/2]]}};
 const clone=o=>JSON.parse(JSON.stringify(o));for(const u of Object.values(UNITS))u.walls0=clone(u.walls);
 let U=UNITS.klinik;
@@ -298,7 +288,7 @@ const ceiling=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandard
 /* ---------- EŞYALAR / DURUM ---------- */
 const itemsGroup=new THREE.Group();aptRoot.add(itemsGroup);
 let items=[],nid=1,selected=null;const objs=new Map();
-const fresh=()=>U.def.map(([type,x,z,rot])=>({id:nid++,type,x,z,rot,color:CAT[type].c}));
+const fresh=()=>U.def.map(([type,x,z,rot,c])=>({id:nid++,type,x,z,rot,color:c||CAT[type].c}));
 function loadItems(){items=[];try{const s=JSON.parse(localStorage.getItem(U.key)||'null');if(Array.isArray(s)&&s.length&&s.every(i=>CAT[i.type])){items=s;nid=Math.max(nid,...s.map(i=>i.id))+1;}}catch(e){}if(!items.length)items=fresh();}
 loadItems();
 const save=()=>{try{localStorage.setItem(U.key,JSON.stringify(items));}catch(e){}};
@@ -321,6 +311,7 @@ const rotate=()=>{const it=items.find(i=>i.id===selected);if(!it)return;pushUndo
 const remove=()=>{const it=items.find(i=>i.id===selected);if(!it)return;pushUndo();items=items.filter(i=>i!==it);itemsGroup.remove(objs.get(it.id));objs.delete(it.id);select(null);save();};
 $('#s-rot').onclick=rotate;$('#s-del').onclick=remove;
 $('#b-undo').onclick=()=>{if(!undo.length)return;const st=JSON.parse(undo.pop());if(Array.isArray(st))items=st;else{items=st.i;U.walls=st.w;clearWallSel();rebuildWalls();saveWalls();}rebuildAll();save();$('#b-undo').disabled=!undo.length;};
+if(location.protocol==='file:'){const be=$('#b-export');be.hidden=false;be.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({items,walls:U.walls},null,1)],{type:'application/json'}));a.download='klinik-plan.json';a.click();};}
 $('#b-reset').onclick=()=>{pushUndo();items=fresh();U.walls=clone(U.walls0);clearWallSel();rebuildWalls();saveWalls();rebuildAll();save();};
 
 /* ---------- KAMERALAR / GÖRÜNÜMLER ---------- */
