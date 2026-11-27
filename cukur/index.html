@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çukur Haritası · Libertech</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root { --koyu:#14181f; --vurgu:#e8590c; --yesil:#2b8a3e; --gri:#868e96; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #harita { position:absolute; inset:0; }
+  .ust {
+    position:absolute; z-index:1000; top:12px; left:56px; right:12px; max-width:420px;
+    background:rgba(20,24,31,.92); color:#fff; border-radius:10px; padding:10px 14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.25); display:flex; align-items:center; gap:12px;
+  }
+  .ust h1 { font-size:16px; margin:0; font-weight:650; }
+  .ust .sayac { margin-left:auto; font-size:13px; color:#ced4da; white-space:nowrap; }
+  .ust .sayac b { color:#fff; font-size:15px; }
+  .ust .nokta { width:8px; height:8px; border-radius:50%; background:var(--yesil); flex:none; }
+  .ust .nokta.hata { background:#e03131; }
+  .kart { width:260px; }
+  .kart img { width:100%; border-radius:6px; display:block; background:#eee; min-height:120px; cursor:zoom-in; }
+  .kart .bilgi { font-size:12px; color:#495057; margin:8px 0; line-height:1.45; }
+  .kart .dugmeler { display:flex; gap:8px; }
+  .kart button {
+    flex:1; border:0; border-radius:6px; padding:9px 6px; font-size:13px; font-weight:600;
+    color:#fff; cursor:pointer;
+  }
+  .kart button:disabled { opacity:.55; cursor:wait; }
+  .b-coz { background:var(--yesil); }
+  .b-yan { background:var(--gri); }
+  .leaflet-popup-content { margin:12px; }
+  .cukur-ikon {
+    width:22px; height:22px; border-radius:50%; background:var(--vurgu);
+    border:3px solid #fff; box-shadow:0 1px 6px rgba(0,0,0,.45);
+  }
+  .bildirim {
+    position:absolute; z-index:1000; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--koyu); color:#fff; padding:9px 16px; border-radius:8px; font-size:14px;
+    opacity:0; transition:opacity .25s; pointer-events:none;
+  }
+  .bildirim.goster { opacity:1; }
+</style>
+</head>
+<body>
+<div id="harita"></div>
+<div class="ust">
+  <span class="nokta" id="durumNokta" title="Sunucu bağlantısı"></span>
+  <h1>Çukur Haritası</h1>
+  <span class="sayac"><b id="sayi">–</b> açık tespit</span>
+</div>
+<div class="bildirim" id="bildirim"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const API = 'https://cukur-api.l1bertech.com';
+const YENILEME_MS = 15000;
+
+const harita = L.map('harita').setView([39.0, 35.0], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '&copy; OpenStreetMap katkıcıları'
+}).addTo(harita);
+
+const ikon = L.divIcon({ className: '', html: '<div class="cukur-ikon"></div>', iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -12] });
+const isaretler = new Map();   // id -> marker
+let ilkYukleme = true;
+
+function bildir(metin) {
+  const el = document.getElementById('bildirim');
+  el.textContent = metin; el.classList.add('goster');
+  clearTimeout(bildir.t); bildir.t = setTimeout(() => el.classList.remove('goster'), 2500);
+}
+
+function kartHtml(t) {
+  const tarih = new Date(t.zaman).toLocaleString('tr-TR');
+  return `<div class="kart">
+    <a href="${API}/gorsel/${t.id}" target="_blank" rel="noopener"><img src="${API}/gorsel/${t.id}" alt="Çukur görseli" loading="lazy"></a>
+    <div class="bilgi">#${t.id} · ${tarih}<br>${t.lat.toFixed(6)}, ${t.lng.toFixed(6)}</div>
+    <div class="dugmeler">
+      <button class="b-coz" data-id="${t.id}" data-durum="cozuldu">Çözüldü</button>
+      <button class="b-yan" data-id="${t.id}" data-durum="yanlis_alarm">Yanlış alarm</button>
+    </div></div>`;
+}
+
+function anahtarAl(sifirla) {
+  let a = sifirla ? null : localStorage.getItem('cukurAnahtar');
+  if (!a) {
+    a = prompt('Yönetici anahtarı:');
+    if (a) localStorage.setItem('cukurAnahtar', a.trim());
+  }
+  return a ? a.trim() : null;
+}
+
+async function kapat(id, durum, dugmeler) {
+  let anahtar = anahtarAl(false);
+  if (!anahtar) return;
+  dugmeler.forEach(b => b.disabled = true);
+  try {
+    let r = await istek(id, durum, anahtar);
+    if (r.status === 401) {
+      localStorage.removeItem('cukurAnahtar');
+      anahtar = anahtarAl(true);
+      if (!anahtar) return;
+      r = await istek(id, durum, anahtar);
+    }
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).hata || r.status);
+    const m = isaretler.get(id);
+    if (m) { harita.removeLayer(m); isaretler.delete(id); }
+    sayacGuncelle();
+    bildir(durum === 'cozuldu' ? 'Çözüldü olarak işaretlendi' : 'Yanlış alarm olarak işaretlendi');
+  } catch (e) {
+    bildir('İşlem başarısız: ' + e.message);
+  } finally {
+    dugmeler.forEach(b => b.disabled = false);
+  }
+}
+
+function istek(id, durum, anahtar) {
+  return fetch(`${API}/api/tespitler/${id}/kapat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Anahtar': anahtar },
+    body: JSON.stringify({ durum })
+  });
+}
+
+harita.on('popupopen', e => {
+  const kok = e.popup.getElement();
+  const dugmeler = [...kok.querySelectorAll('button[data-id]')];
+  dugmeler.forEach(b => b.onclick = () => kapat(+b.dataset.id, b.dataset.durum, dugmeler));
+});
+
+function sayacGuncelle() { document.getElementById('sayi').textContent = isaretler.size; }
+
+async function yukle() {
+  const nokta = document.getElementById('durumNokta');
+  try {
+    const r = await fetch(`${API}/api/tespitler`, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const liste = await r.json();
+    const gelen = new Set(liste.map(t => t.id));
+    for (const [id, m] of isaretler) if (!gelen.has(id)) { harita.removeLayer(m); isaretler.delete(id); }
+    let yeni = 0;
+    for (const t of liste) {
+      if (isaretler.has(t.id)) continue;
+      const m = L.marker([t.lat, t.lng], { icon: ikon }).bindPopup(kartHtml(t), { maxWidth: 290 });
+      m.addTo(harita); isaretler.set(t.id, m); yeni++;
+    }
+    if (ilkYukleme && liste.length) {
+      harita.fitBounds(L.latLngBounds(liste.map(t => [t.lat, t.lng])).pad(0.2), { maxZoom: 17 });
+    } else if (!ilkYukleme && yeni) {
+      bildir(`${yeni} yeni çukur tespiti`);
+    }
+    ilkYukleme = false;
+    sayacGuncelle();
+    nokta.classList.remove('hata'); nokta.title = 'Sunucu bağlantısı: tamam';
+  } catch (e) {
+    nokta.classList.add('hata'); nokta.title = 'Sunucuya ulaşılamadı';
+  }
+}
+
+yukle();
+setInterval(yukle, YENILEME_MS);
+</script>
+</body>
+</html>
